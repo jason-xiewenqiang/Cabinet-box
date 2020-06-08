@@ -1,24 +1,29 @@
 import { loadTexture } from './utils'
 
 window.onload = function () {
-  new IScene()
+  const iScene = new IScene()
+  const cabinet = new Cabinet(50, 50, 'Hello', iScene)
+  // window.addEventListener('resize', iScene.onResize.bind(iScene), false)
 }
 
 class IScene {
   constructor(params) {
     this.scene = new THREE.Scene()
     this.scene.add(new THREE.AxesHelper(150))
-    this.initCamera()
+    this.camera = this.initCamera()
     this.initLight()
     this.initRenderer()
     this.initTexture()
     this.initFloor()
     this.render()
+    this.initControls()
+    window.addEventListener('resize', this.onResize.bind(this), false)
   }
 
   initCamera() {
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000)
-    this.camera.position.set(0, 100, 300)
+    const camera =new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000)
+    camera.position.set(0, 100, 300)
+    return camera
   }
 
   initLight() {
@@ -45,10 +50,10 @@ class IScene {
     this.floorTexture.repeat.set(14, 10)
   }
 
-  loadTexture(src, render) {
-    const loader = new THREE.TextureLoader()
-    return loader.load(src, () => {render()})
-  }
+  // loadTexture(src, render) {
+  //   const loader = new THREE.TextureLoader()
+  //   return loader.load(src, () => {render()})
+  // }
 
   initFloor() {
     console.log(this.floorTexture)
@@ -66,6 +71,12 @@ class IScene {
     this.renderer.render(this.scene, this.camera)
   }
 
+  initControls() {
+    this.controls = new THREE.OrbitControls(this.camera)
+    this.controls.addEventListener('change', this.render.bind(this))
+    this.controls.maxDistance = 2000
+  }
+
   onResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight
     this.camera.updateProjectionMatrix()
@@ -74,26 +85,27 @@ class IScene {
 }
 
 class Cabinet {
-  _bottonWidth = 30 // 宽
+  _bottomWidth = 30 // 宽
   _bottomLength = 40 // 长
-  constructor(x, z, cabNumber, scene) {
+  constructor(x, z, cabNumber, sceneInstance) {
     this.x = x
     this.z = z
     this.y = 0
     this.number = cabNumber
+    this.buildBox(sceneInstance)
   }
   
-  buildBox(scene) {
+  buildBox(sceneInstance) {
     // 机箱外表
-    const t1 = loadTexture('image/rack_panel.jpg', scene.render)
-    const t2 = loadTexture('image/cabz.jpg', scene.render)
-    const t3 = loadTexture('image/cabz.jpg', scene.render)
+    const t1 = loadTexture('images/rack_panel.jpg', () => { sceneInstance.render() })
+    const t2 = loadTexture('images/cabz.jpg', () => { sceneInstance.render() })
+    const t3 = loadTexture('images/cabz.jpg', () => { sceneInstance.render() })
 
     const cabGroup = new THREE.Group()
     cabGroup.position.set(this.x, this.y, this.z)
     cabGroup.name = 'CabinetGroup'
 
-    const cabMatLanbert = new THREE.MeshLambertMaterial({
+    const cabMatLambert = new THREE.MeshLambertMaterial({
       color:0x8E8E8E,
       map: t1
     })
@@ -103,7 +115,7 @@ class Cabinet {
     })
 
     // 机箱主体？
-    const cabBottomGeo = new THREE.BoxGeometry(this._bottonWidth, 2, this._bottomLength)
+    const cabBottomGeo = new THREE.BoxGeometry(this._bottomWidth, 2, this._bottomLength)
     const cabBottom = new THREE.Mesh(cabBottomGeo, cabMatBasic)
     cabBottom.position.set(0, 1, 0)
 
@@ -111,28 +123,28 @@ class Cabinet {
     const cabLeftGeo = new THREE.BoxGeometry(2, 88, this._bottomLength)
     const cabLeftMaterials = []
     cabLeftMaterials.push(
-      cabMatLanbert,
-      cabMatLanbert,
-      cabMatLanbert,
-      cabMatLanbert,
+      cabMatLambert,
+      cabMatLambert,
+      cabMatLambert,
+      cabMatLambert,
       new THREE.MeshBasicMaterial({
         color:  0xBEBEBE,
         map: t2
       }),
       cabMatBasic
     )
-    const cabLeftMat = new THREE.MeshFaceMaterial(cabSizeMaterials)
+    const cabLeftMat = new THREE.MeshFaceMaterial(cabLeftMaterials)
     const cabLeft = new THREE.Mesh(cabLeftGeo, cabLeftMat)
-    cabLeft.position.set(this._bottonWidth / 2 - 1, 46, 0)
+    cabLeft.position.set(this._bottomWidth / 2 - 1, 46, 0)
 
     // 右侧
     const cabRightGeo = new THREE.BoxGeometry(2, 88, this._bottomLength)
     const cabRightMaterials = []
     cabRightMaterials.push(
-      cabMatLanbert,
+      cabMatLambert,
       cabMatBasic,
-      cabMatLanbert,
-      cabMatLanbert,
+      cabMatLambert,
+      cabMatLambert,
       new THREE.MeshBasicMaterial({
         color:  0xBEBEBE,
         map: t3
@@ -141,40 +153,40 @@ class Cabinet {
     )
     const cabRightMat = new THREE.MeshFaceMaterial(cabRightMaterials)
     const cabRight = new THREE.Mesh(cabRightGeo, cabRightMat)
-    cabRight.position.set(- this._bottonWidth / 2 + 1, 46, 0)
+    cabRight.position.set(- this._bottomWidth / 2 + 1, 46, 0)
 
     // 背面版
-    const cabBackGeo = new THREE.BoxGeometry(this._bottonWidth -4, 88, 2); // 后板
+    const cabBackGeo = new THREE.BoxGeometry(this._bottomWidth -4, 88, 2); // 后板
     const cabBack = new THREE.Mesh(cabBackGeo, cabMatBasic);
     cabBack.position.set(0, 46, 0 - this._bottomLength / 2 + 1);
     
     // 顶板
-    const cabTopGeo = new THREE.BoxGeometry(this._bottonWidth, 2, this._bottomLength)
+    const cabTopGeo = new THREE.BoxGeometry(this._bottomWidth, 2, this._bottomLength)
     const cabTopMaterials = []
     cabTopMaterials.push(
       cabMatBasic,
       cabMatBasic,
       new THREE.MeshLambertMaterial({
         color:0x8E8E8E,
-        map: this.canvasTxture(this.number)
+        map: this.canvasTexture(this.number)
       }),
-      cabMatLanbert,
-      cabMatLanbert,
-      cabMatLanbert,
+      cabMatLambert,
+      cabMatLambert,
+      cabMatLambert,
     )
-    const cabToptMat = new THREE.MeshFaceMaterial(cabTopMaterials)
-    const cabTop = new THREE.Mesh(cabTopGeo, cabToptMat)
+    const cabTopMat = new THREE.MeshFaceMaterial(cabTopMaterials)
+    const cabTop = new THREE.Mesh(cabTopGeo, cabTopMat)
     cabTop.position.set(0, 91, 0)
-    cabs.name = 'cabTop'
+    cabTop.name = 'cabTop'
 
-    cabGroup.add(cabBottom, cabSide, cabRight, cabBack, cabTopGeo)
+    cabGroup.add(cabBottom, cabLeft, cabRight, cabBack, cabTop)
 
     // 机箱门
     const cabDoorGroup = new THREE.Group()
     cabDoorGroup.position.set(this.x + 15, this.y, this.z + 20)
     cabDoorGroup.name = this.number
 
-    const doorGeo = new THREE.BoxGeometry(this._bottonWidth, 92, 1)
+    const doorGeo = new THREE.BoxGeometry(this._bottomWidth, 92, 1)
     const doorMaterials = []
     doorMaterials.push(
       new THREE.MeshLambertMaterial({ color: 0x999999 }),
@@ -182,16 +194,24 @@ class Cabinet {
       new THREE.MeshLambertMaterial({ color: 0x999999 }),
       new THREE.MeshLambertMaterial({ color: 0x999999 }),
       new THREE.MeshLambertMaterial({ 
-        map: loadTexture('image/rack_front_door.jpg', scene.render),
+        map: loadTexture('images/rack_front_door.jpg', () => { sceneInstance.render() }),
         overdraw: true
       }),
+      new THREE.MeshBasicMaterial({
+        map: loadTexture('images/rack_front_door.jpg', () => { sceneInstance.render() }),
+        overdraw:true
+      })
     )
+    const doorMat = new THREE.MeshFaceMaterial(doorMaterials)
+    const door = new THREE.Mesh(doorGeo, doorMat)
+    door.name = 'door'
+    door.position.set(- this._bottomWidth / 2, 46, .5)
+    cabDoorGroup.add(door)
 
-
-
+    sceneInstance.scene.add(cabGroup, cabDoorGroup)
   }
 
-  canvasTxture(number) {
+  canvasTexture(number) {
     const canvas = document.createElement("canvas")
     canvas.width = 50
     canvas.height = 40
@@ -201,8 +221,8 @@ class Cabinet {
     g.addColorStop(1, "#777")
     ctx.fillStyle = g
     ctx.fillRect(0, 0, 50, 40)
-    ctx.textBaseline='top'
-    ctx.font="20px SimHei"
+    ctx.textBaseline = 'top'
+    ctx.font = "20px SimHei"
     ctx.fillStyle = "#00ffff"
     const txtWidth = ctx.measureText(number).width
     ctx.fillText(number , 50 / 2 - txtWidth / 2, 40 / 2 - 20 / 2)
