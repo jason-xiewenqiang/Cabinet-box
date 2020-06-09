@@ -2,7 +2,7 @@ import { loadTexture } from './utils'
 
 window.onload = function () {
   const iScene = new IScene()
-  const cabinet = new Cabinet(50, 50, 'Hello', iScene)
+  const cabinet = new Cabinet(50, 50, '机柜1', iScene)
   // window.addEventListener('resize', iScene.onResize.bind(iScene), false)
 }
 
@@ -17,7 +17,9 @@ class IScene {
     this.initFloor()
     this.render()
     this.initControls()
+    this.animate()
     window.addEventListener('resize', this.onResize.bind(this), false)
+    window.addEventListener('dblclick', this.injectHandler.bind(this), false)
   }
 
   initCamera() {
@@ -50,13 +52,7 @@ class IScene {
     this.floorTexture.repeat.set(14, 10)
   }
 
-  // loadTexture(src, render) {
-  //   const loader = new THREE.TextureLoader()
-  //   return loader.load(src, () => {render()})
-  // }
-
   initFloor() {
-    console.log(this.floorTexture)
     const geometry = new THREE.BoxGeometry(400, 2, 300)
     const material = new THREE.MeshLambertMaterial({
         color: 0xffffff,
@@ -68,6 +64,7 @@ class IScene {
   }
 
   render() {
+    TWEEN.update()
     this.renderer.render(this.scene, this.camera)
   }
 
@@ -81,6 +78,63 @@ class IScene {
     this.camera.aspect = window.innerWidth / window.innerHeight
     this.camera.updateProjectionMatrix()
     this.renderer.setSize(window.innerWidth, window.innerHeight)
+  }
+
+  // 注册器
+  injectHandler(event) {
+    
+    event.preventDefault()
+    // 在屏幕上点击的位置创建一个向量
+    let vector = new THREE.Vector3(
+      (event.clientX / window.innerWidth ) * 2 - 1,
+      -( event.clientY / window.innerHeight ) * 2 + 1,
+      0.5
+    )
+    // 点击位置转换成Thres.js场景中的坐标
+    vector = vector.unproject(this.camera)
+    // 用THREE.Raycaster对象向点击位置发射光线
+    const raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize())
+    // 计算射线相机到的对象，可能有多个对象，因此返回的是一个数组，按离相机远近排列
+    // 将射线投影到屏幕，如果scene.children里的某个或多个形状相交，则返回这些形状
+    // 第二个参数是设置是否递归，默认是false，也就是不递归。当scene里面添加了Group对象的实例时，就需要设置这个参数为true
+    // 第一个参数不传scene.children也可以，传一个group.children或一个形状数组都可以（这样可以实现一些特别的效果如点击内部的效果）
+    // 另外，因为返回的是一个数组，所以遍历数组就可以获得所有相交的对象，当元素重叠时，特别有用
+    const intersects = raycaster.intersectObjects(this.scene.children, true)
+    // firstObj为点击到的第一个对象
+    const firstObj = intersects[0].object
+
+    if (firstObj.name == 'door') {
+      const p1 = new THREE.Vector3(firstObj.parent.position)
+      const number = firstObj.parent.name
+
+      if (firstObj.parent.rotation.y == 0) {
+        new TWEEN.Tween(firstObj.parent.rotation).to({
+          y: 0.6 * Math.PI
+        }, 1500).easing(TWEEN.Easing.Elastic.Out).start()
+
+        this.controls.target = new THREE.Vector3(
+          firstObj.parent.position.x,
+          firstObj.parent.position.y+50,
+          firstObj.parent.position.z
+        )
+        this.camera.position.set(
+          firstObj.parent.position.x+15,
+          firstObj.parent.position.y+100,
+          firstObj.parent.position.z+130
+        )
+      } else {
+        new TWEEN.Tween( firstObj.parent.rotation ).to({
+          y: 0
+        }, 300 ).start()
+      }
+      this.controls.update()
+    }
+    this.render()
+  }
+
+  animate() {
+    requestAnimationFrame(this.animate.bind(this))
+    this.render()
   }
 }
 
@@ -99,18 +153,18 @@ class Cabinet {
     // 机箱外表
     const t1 = loadTexture('images/rack_panel.jpg', () => { sceneInstance.render() })
     const t2 = loadTexture('images/cabz.jpg', () => { sceneInstance.render() })
-    const t3 = loadTexture('images/cabz.jpg', () => { sceneInstance.render() })
+    const t3 = loadTexture('images/caby.jpg', () => { sceneInstance.render() })
 
     const cabGroup = new THREE.Group()
     cabGroup.position.set(this.x, this.y, this.z)
     cabGroup.name = 'CabinetGroup'
 
     const cabMatLambert = new THREE.MeshLambertMaterial({
-      color:0x8E8E8E,
+      color: 0x8E8E8E,
       map: t1
     })
     const cabMatBasic = new THREE.MeshBasicMaterial({
-      color:0x8E8E8E,
+      color: 0x8E8E8E,
       map: t1
     })
 
@@ -156,7 +210,7 @@ class Cabinet {
     cabRight.position.set(- this._bottomWidth / 2 + 1, 46, 0)
 
     // 背面版
-    const cabBackGeo = new THREE.BoxGeometry(this._bottomWidth -4, 88, 2); // 后板
+    const cabBackGeo = new THREE.BoxGeometry(this._bottomWidth - 4, 88, 2); // 后板
     const cabBack = new THREE.Mesh(cabBackGeo, cabMatBasic);
     cabBack.position.set(0, 46, 0 - this._bottomLength / 2 + 1);
     
@@ -194,18 +248,16 @@ class Cabinet {
       new THREE.MeshLambertMaterial({ color: 0x999999 }),
       new THREE.MeshLambertMaterial({ color: 0x999999 }),
       new THREE.MeshLambertMaterial({ 
-        map: loadTexture('images/rack_front_door.jpg', () => { sceneInstance.render() }),
-        overdraw: true
+        map: loadTexture('images/rack_front_door.jpg', () => { sceneInstance.render() })
       }),
       new THREE.MeshBasicMaterial({
-        map: loadTexture('images/rack_front_door.jpg', () => { sceneInstance.render() }),
-        overdraw:true
+        map: loadTexture('images/rack_door_back.jpg', () => { sceneInstance.render() })
       })
     )
     const doorMat = new THREE.MeshFaceMaterial(doorMaterials)
     const door = new THREE.Mesh(doorGeo, doorMat)
     door.name = 'door'
-    door.position.set(- this._bottomWidth / 2, 46, .5)
+    door.position.set(- this._bottomWidth / 2, 46, 0.5)
     cabDoorGroup.add(door)
 
     sceneInstance.scene.add(cabGroup, cabDoorGroup)
@@ -232,3 +284,6 @@ class Cabinet {
   }
   
 }
+
+
+

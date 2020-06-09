@@ -365,7 +365,7 @@
     document.addEventListener('dblclick', onDocumentMouseDown, false);
     function onDocumentMouseDown(event) {
         event.preventDefault();
-        //1、先基于我们在屏幕上点击的位置创建一个向量
+        // 1、先基于我们在屏幕上点击的位置创建一个向量
         var vector = new THREE.Vector3(
             (event.clientX / window.innerWidth ) * 2 - 1,
             -( event.clientY / window.innerHeight ) * 2 + 1,
