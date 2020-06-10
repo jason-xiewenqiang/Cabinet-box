@@ -2,13 +2,15 @@ import { loadTexture } from './utils'
 
 window.onload = function () {
   const iScene = new IScene()
-  const cabinet = new Cabinet(50, 50, '机柜1', iScene)
-  // window.addEventListener('resize', iScene.onResize.bind(iScene), false)
+  const cabinet = new Cabinet(-32, 0, '机柜1', iScene)
+  const cabinet1 = new Cabinet(0, 0, '机柜2', iScene)
+  const cabinet2 = new Cabinet(32, 0, '机柜3', iScene)
 }
 
 class IScene {
   constructor(params) {
     this.scene = new THREE.Scene()
+    this.scene.position.set(0, -50, 0)
     this.scene.add(new THREE.AxesHelper(150))
     this.camera = this.initCamera()
     this.initLight()
@@ -23,8 +25,8 @@ class IScene {
   }
 
   initCamera() {
-    const camera =new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000)
-    camera.position.set(0, 100, 300)
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000)
+    camera.position.set(0, 45, 200)
     return camera
   }
 
@@ -112,16 +114,16 @@ class IScene {
           y: 0.6 * Math.PI
         }, 1500).easing(TWEEN.Easing.Elastic.Out).start()
 
-        this.controls.target = new THREE.Vector3(
-          firstObj.parent.position.x,
-          firstObj.parent.position.y+50,
-          firstObj.parent.position.z
-        )
-        this.camera.position.set(
-          firstObj.parent.position.x+15,
-          firstObj.parent.position.y+100,
-          firstObj.parent.position.z+130
-        )
+        // this.controls.target = new THREE.Vector3(
+        //   firstObj.parent.position.x,
+        //   firstObj.parent.position.y+50,
+        //   firstObj.parent.position.z
+        // )
+        // this.camera.position.set(
+        //   firstObj.parent.position.x+15,
+        //   firstObj.parent.position.y+100,
+        //   firstObj.parent.position.z+130
+        // )
       } else {
         new TWEEN.Tween( firstObj.parent.rotation ).to({
           y: 0
@@ -284,6 +286,11 @@ class Cabinet {
   }
   
 }
+
+
+
+
+
 
 
 
