@@ -6,7 +6,7 @@
 - port at 8000
 
 ## Image
-![效果](https://github.com/jason-xiewenqiang/Cabinet-box/tree/master/images/cabinet.jpg)
+![效果](images/cabinet.jpg)
 
 
 
