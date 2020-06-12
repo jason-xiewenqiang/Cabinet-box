@@ -1,7 +1,7 @@
 class Rope {
   constructor(options) {
     this.x = options.cabinet.x
-    this.y = options.y
+    this.y = options.y || 0
     this.z = options.cabinet.z
     this.radius = options.radius
     this.build(options.scene)
