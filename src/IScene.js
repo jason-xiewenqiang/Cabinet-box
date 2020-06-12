@@ -10,8 +10,8 @@ class IScene {
     this.initLight()
     this.initRenderer()
     this.initTexture()
+    this.scene.add(new THREE.AxesHelper(150))
     if (params && params.dev) {
-      this.scene.add(new THREE.AxesHelper(150))
       this.initFloor()
       this.stats()
     }
