@@ -11,8 +11,8 @@ class Smoke {
     const group = new THREE.Group()
     group.position.set(this.x, this.y, this.z)
 
-    const material = new THREE.LineBasicMaterial({color: 'green'})
-    const material1 = new THREE.LineBasicMaterial({color: 'blue'})
+    const material = new THREE.LineBasicMaterial({color: 0x007aff})
+    const material1 = new THREE.LineBasicMaterial({color: 0x007aff})
 
     var geometry2 = new THREE.CylinderGeometry( 4, 4, 1, 25 );
     var geometry3 = new THREE.CylinderGeometry(3, 0, 1, 25);

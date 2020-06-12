@@ -1,10 +1,12 @@
+import { randomColor } from './utils'
 import IScene from './IScene'
 import Server from './Server'
 import Cabinet from './Cabinet'
 import Switch from './Switch'
 import Rope from './Rope'
 import Smoke from './Smoke'
-import Sense from './Sense'
+// import Sense from './Sense'
+import GunTypeCamera from './GunTypeCamera'
 
 window.onload = function () {
 
@@ -16,7 +18,9 @@ window.onload = function () {
     maxServerCount: 11 // 最多能存放几台服务器
   }
 
-  const iScene = new IScene({dev: false})
+  const iScene = new IScene({dev: true})
+
+  // new GunTypeCamera({scene: iScene})
   
   // 机柜
   const cabinet = new Cabinet(-32, 0, '机柜1', iScene)
@@ -29,21 +33,21 @@ window.onload = function () {
   new Switch(iScene, cabinet2, config.switchTop)
 
   // 门感
-  new Sense({
-    height: 90,
-    scene: iScene,
-    cabinet: cabinet
-  })
-  new Sense({
-    height: 90,
-    scene: iScene,
-    cabinet: cabinet1
-  })
-  new Sense({
-    height: 90,
-    scene: iScene,
-    cabinet: cabinet2
-  })
+  // new Sense({
+  //   height: 90,
+  //   scene: iScene,
+  //   cabinet: cabinet
+  // })
+  // new Sense({
+  //   height: 90,
+  //   scene: iScene,
+  //   cabinet: cabinet1
+  // })
+  // new Sense({
+  //   height: 90,
+  //   scene: iScene,
+  //   cabinet: cabinet2
+  // })
 
   // 烟感
   new Smoke({
@@ -63,7 +67,7 @@ window.onload = function () {
   })
 
   //漏水绳子
-  new Rope({
+  const rope1 = new Rope({
     y: 3,
     radius: 1,
     scene: iScene,
@@ -81,7 +85,15 @@ window.onload = function () {
     scene: iScene,
     cabinet: cabinet2
   })
-  
+
+  console.log('rope1', rope1)
+  const target = rope1.group.children[0]
+  console.log('material', target)
+
+  setInterval(() => {
+    target.material = new THREE.MeshBasicMaterial({color: randomColor()})
+  }, 3000)
+
   // 服务器
   for (let i = 0; i < config.maxServerCount; i++) {
     new Server(iScene, cabinet, config.serverTop + i * (config.serverHeight + config.serverSpacing))
