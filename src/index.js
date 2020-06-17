@@ -7,6 +7,7 @@ import Rope from './Rope'
 import Smoke from './Smoke'
 // import Sense from './Sense'
 import GunTypeCamera from './GunTypeCamera'
+import { render } from './InfoPanel'
 
 window.onload = function () {
 
@@ -17,6 +18,17 @@ window.onload = function () {
     serverSpacing: 2.1, // 服务器之间的间隔
     maxServerCount: 11 // 最多能存放几台服务器
   }
+
+  const data = [
+    {name: '机柜1', wd: 30, sd: 30},
+    {name: '机柜2', wd: 30, sd: 30},
+    {name: '机柜3', wd: 30, sd: 30}
+  ]
+
+  render(data)
+  setInterval(() => {
+    render(data)
+  }, 3000)
 
   const iScene = new IScene({dev: true})
 
@@ -50,48 +62,93 @@ window.onload = function () {
   // })
 
   // 烟感
-  new Smoke({
+  const smoke1 = new Smoke({
     height: 90,
     scene: iScene,
     cabinet: cabinet1
   })
-  new Smoke({
+  const smoke2 = new Smoke({
     height: 90,
     scene: iScene,
     cabinet: cabinet
   })
-  new Smoke({
+  const smoke3 = new Smoke({
     height: 90,
     scene: iScene,
     cabinet: cabinet2
   })
 
-  //漏水绳子
+
+  const changeSmoke1 = () => {
+    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+    smoke1.group.children.forEach(el => {
+      el.material = mbm
+    })
+    setTimeout(() => {
+      changeSmoke1()
+    }, Math.random() * 5000)
+  }
+  const changeSmoke2 = () => {
+    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+    smoke2.group.children.forEach(el => {
+      el.material = mbm
+    })
+    setTimeout(() => {
+      changeSmoke2()
+    }, Math.random() * 5000)
+  }
+  const changeSmoke3 = () => {
+    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+    smoke3.group.children.forEach(el => {
+      el.material = mbm
+    })
+    setTimeout(() => {
+      changeSmoke3()
+    }, Math.random() * 5000)
+  }
+
+  // changeSmoke1()
+  changeSmoke2()
+  // changeSmoke3()
+
+
+  // 漏水绳子
   const rope1 = new Rope({
     y: 3,
     radius: 1,
     scene: iScene,
     cabinet: cabinet1
   })
-  new Rope({
+  const rope2 = new Rope({
     y: 3,
     radius: 1,
     scene: iScene,
     cabinet: cabinet
   })
-  new Rope({
+  const rope3 = new Rope({
     y: 3,
     radius: 1,
     scene: iScene,
     cabinet: cabinet2
   })
 
-  console.log('rope1', rope1)
-  const target = rope1.group.children[0]
-  console.log('material', target)
+  // console.log('rope1', rope1)
+  const target1 = rope1.group.children[0]
+  const target2 = rope2.group.children[0]
+  const target3 = rope3.group.children[0]
+  // console.log('material', target)
+
+  
+
+  const changeRope = () => {
+    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+    target1.material = mbm
+    target2.material = mbm
+    target3.material = mbm
+  }
 
   setInterval(() => {
-    target.material = new THREE.MeshBasicMaterial({color: randomColor()})
+    changeRope()
   }, 3000)
 
   // 服务器

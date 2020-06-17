@@ -25,6 +25,7 @@ class Smoke {
 
     group.add(mesh2)
     group.add(mesh3)
+    this.group = group
     sceneInstance.scene.add(group)
   }
 }
