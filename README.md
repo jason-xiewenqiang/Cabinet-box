@@ -1,12 +1,16 @@
+# Project
+- 三连柜
+
 ## Project Start
 - npm install
 
 ## Run Porject
-- npm start
+- npm run dev
 - port at 8000
 
 ## Image
-![效果](images/cabinet.jpg)
+![效果](images/cab.png)
+<!-- ![效果](images/cabinet.jpg) -->
 
 
 
