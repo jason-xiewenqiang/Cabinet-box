@@ -163,8 +163,8 @@ class IScene {
     const firstObj = intersects[0].object
 
     if (firstObj.name == 'door') {
-      const p1 = new THREE.Vector3(firstObj.parent.position)
-      const number = firstObj.parent.name
+      // const p1 = new THREE.Vector3(firstObj.parent.position)
+      // const number = firstObj.parent.name
 
       if (firstObj.parent.rotation.y == 0) {
         new TWEEN.Tween(firstObj.parent.rotation).to({
@@ -188,6 +188,21 @@ class IScene {
       }
       this.controls.update()
     }
+
+    if(firstObj.name === 'server'){
+       var p1 = new THREE.Vector3(firstObj.parent.position);
+        console.log(p1)
+       if(firstObj.parent.position.z === 0){
+           new TWEEN.Tween( firstObj.parent.position ).to({
+               z: firstObj.parent.position.z + 20
+           }, 500 ).easing( TWEEN.Easing.Elastic.Out).start();
+       }else{
+           new TWEEN.Tween( firstObj.parent.position ).to({
+               z: firstObj.parent.position.z - 20
+           }, 500 ).easing( TWEEN.Easing.Elastic.Out).start();
+       }
+       this.controls.update()
+   }
     this.render()
   }
 

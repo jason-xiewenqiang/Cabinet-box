@@ -23,6 +23,7 @@ class Server {
     })
     const server = new THREE.Mesh(serverGEO, serverMat)
     server.position.set(0, this.h, 2)
+    server.name = 'server'
 
     const serverMGeo = new THREE.BoxGeometry(26.4, 4, 0.2)
     const serverMaterials = []
@@ -30,11 +31,12 @@ class Server {
 
     // 服务器的材质
     serverMaterials.push(serverMat, serverMat, serverMat, serverMat, serverMat, serverMat)
-    const serverMMat = new THREE.MeshFaceMaterial(serverMaterials)
-    const serverMFace = new THREE.Mesh(serverMGeo, serverMMat)
-    serverMFace.name = 'server'
+    // const serverMMat = new THREE.MeshFaceMaterial(serverMaterials)
+    // const serverMFace = new THREE.Mesh(serverMGeo, serverMMat)
+    // serverMFace.name = 'server'
     // serverMFace.position.set(0, this.h, 36 / 2 + 0.2 / 2 + 2)
-    serverGroup.add(server, serverMFace)
+    // serverGroup.add(server, serverMFace)
+    serverGroup.add(server)
     sceneInstance.scene.add(serverGroup)
   }
 }
