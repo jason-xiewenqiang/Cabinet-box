@@ -8,6 +8,10 @@
 - npm run dev
 - port at 8000
 
+## Project 打包成模块
+- npm run lib
+- 查看lib下的main.html设置内容
+
 ## Image
 ![效果](images/cab.png)
 <!-- ![效果](images/cabinet.jpg) -->

@@ -18,7 +18,7 @@
     }
     .cabinet-info {
       z-index: 1000000;
-      position: fixed;
+      position: absolute;
       left: calc(50% - 240px);
       bottom: 5%;
       width: auto;
@@ -43,13 +43,27 @@
       border-left: 1px solid #fff;
       border-right: 1px solid #fff;
     }
+    .box {
+      width: 800px;
+      height: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
   </style>
 </head>
 <body>
+  <div class="box">
+
+  </div>
   <script src="./js/three.min.js"></script>
-  <script src="./js/OBJLoader.js"></script>
   <script src="./js/OrbitControls.js"></script>
   <script src="./js/tween.js"></script>
   <script src="./js/Stats.js"></script>
+  <script src="cabinet.js"></script>
+  <script>
+    window.onload = function() {
+      Cabinet('.box')
+    }
+  </script>
 </body>
 </html>

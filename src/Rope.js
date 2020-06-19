@@ -28,7 +28,7 @@ class Rope {
 
     const CurvePath = new THREE.CurvePath()
     CurvePath.curves.push(line1, curve, line2)
-    const geometry = new THREE.TubeGeometry(CurvePath, 200, 0.5, 25, true)
+    const geometry = new THREE.TubeGeometry(CurvePath, 200, 0.2, 25, true)
     const mesh = new THREE.Mesh(geometry, material)
     group.add(mesh)
     this.group = group

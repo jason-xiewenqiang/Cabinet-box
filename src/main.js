@@ -1,24 +1,20 @@
 import { randomColor } from './utils'
-import IScene from './IScene'
+import IScene from './ISceneUmd'
 import Server from './Server'
 import Cabinet from './Cabinet'
 import Switch from './Switch'
 import Rope from './Rope'
 import Smoke from './Smoke'
-// import Sense from './Sense'
-import GunTypeCamera from './GunTypeCamera'
-import Camera from './Camera'
 import { render } from './InfoPanel'
-
-window.onload = function () {
-
-  runCabinet()
-
-}
 
 export default runCabinet
 
-function runCabinet() {
+/**
+ * 执行渲染
+ * @param {*} selector 宿主（容器）
+ */
+function runCabinet(selector) {
+
   const config = {
     switchTop: 11.5, // 交换机距离地板的高度
     serverTop: 21.5, // 最低的服务器距离地板的高度
@@ -33,15 +29,12 @@ function runCabinet() {
     {name: '机柜3', wd: 30, sd: 30}
   ]
 
-  render(data)
+  render(data, selector)
   setInterval(() => {
-    render(data)
+    render(data, selector)
   }, 3000)
 
-  const iScene = new IScene({dev: true})
-
-  // 摄像头
-  // const camera = new Camera(110, 140, 40, iScene)
+  const iScene = new IScene({parent: selector ? document.querySelector(selector) : window})
 
   // 机柜
   const cabinet = new Cabinet(-32, 0, '机柜1', iScene)
@@ -69,7 +62,6 @@ function runCabinet() {
     scene: iScene,
     cabinet: cabinet2
   })
-
 
   const changeSmoke1 = () => {
     const mbm = new THREE.MeshBasicMaterial({color: randomColor()})

@@ -23,7 +23,8 @@ module.exports = {
         removeComments: false
       }
     }),
-    new CopyWebpackPlugin({patterns: [{from: 'js/*.js', to: 'js'}]})
+    new CopyWebpackPlugin({patterns: [{from: 'js/*.js', to: ''}]}),
+    new CopyWebpackPlugin({patterns: [{from: 'images/*', to: ''}]})
   ],
   module: {
     rules: [
@@ -51,7 +52,7 @@ module.exports = {
             {
               loader:"url-loader",
               options:{
-                  limit:50000,   //表示低于50000字节（50K）的图片会以 base64编码
+                  limit: 1000,
                   outputPath:"./images",
                   name: '[name].[hash:5].[ext]',
                   pulbicPath:"./dist/images",
