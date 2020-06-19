@@ -131,6 +131,12 @@ class IScene {
     this.controls = new THREE.OrbitControls(this.camera)
     this.controls.addEventListener('change', this.render.bind(this))
     this.controls.maxDistance = 2000
+    //上下翻转的最大角度
+    this.controls.maxPolarAngle = 1.5
+    //上下翻转的最小角度
+    this.controls.minPolarAngle = 0.3
+    //是否允许缩放
+    this.controls.enableZoom = false
   }
 
   onResize() {

@@ -1,23 +1,17 @@
-class Camera {
-  constructor(x,y,z,sceneInstance) {
-    this.x = x
-    this.y = y
-    this.z = z
-    this.build(sceneInstance.scene)
+export const renderCamera = (d, selector = 'body') => {
+  const data = JSON.parse(JSON.stringify(d))
+  let div
+  const hasDOM = !!document.querySelector('.cabinet-camera')
+  if (document.querySelector('.cabinet-camera')) {
+    div = document.querySelector('.cabinet-camera')
+  } else {
+    div = document.createElement('div')
   }
-  build (scene) {
-    const loader = new THREE.OBJLoader();
-    loader.load('../js/camera.obj', (obj) => {
-      // console.log(obj);
-      // console.log(obj.children[0].material);
-      console.log(obj.children)
-      obj.position.set(0, 40, 40)
-      scene.add(obj);
-      // obj.children[0].scale.set(20,20,20); 
-      obj.children[0].geometry.center(); 
-      obj.children[0].material.color.set(0xff0000); 
-    })
+  div.className = 'cabinet-camera'
+  div.innerHTML = ''
+  let html = `<img src='../images/myCamera.png'/>`
+  div.innerHTML = html
+  if (!hasDOM) {
+    document.querySelector(selector).appendChild(div)
   }
 }
-
-export default Camera

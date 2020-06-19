@@ -6,9 +6,10 @@ import Switch from './Switch'
 import Rope from './Rope'
 import Smoke from './Smoke'
 // import Sense from './Sense'
-import GunTypeCamera from './GunTypeCamera'
-import Camera from './Camera'
+// import GunTypeCamera from './GunTypeCamera'
+// import Camera from './Camera'
 import { render } from './InfoPanel'
+import { renderCamera } from './Camera'
 
 window.onload = function () {
 
@@ -41,12 +42,16 @@ function runCabinet() {
   const iScene = new IScene({dev: true})
 
   // 摄像头
-  // const camera = new Camera(110, 140, 40, iScene)
+  renderCamera(data)
 
   // 机柜
+  const cabinet00 = new Cabinet(-96, 0, '机柜1', iScene)
+  const cabinet0 = new Cabinet(-64, 0, '机柜1', iScene)
   const cabinet = new Cabinet(-32, 0, '机柜1', iScene)
   const cabinet1 = new Cabinet(0, 0, '机柜2', iScene)
   const cabinet2 = new Cabinet(32, 0, '机柜3', iScene)
+  const cabinet3 = new Cabinet(64, 0, '机柜3', iScene)
+  const cabinet4 = new Cabinet(96, 0, '机柜3', iScene)
 
   // 交换机
   new Switch(iScene, cabinet, config.switchTop)
@@ -71,35 +76,35 @@ function runCabinet() {
   })
 
 
-  const changeSmoke1 = () => {
-    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
-    smoke1.group.children.forEach(el => {
-      el.material = mbm
-    })
-    setTimeout(() => {
-      changeSmoke1()
-    }, Math.random() * 5000)
-  }
-  const changeSmoke2 = () => {
-    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
-    smoke2.group.children.forEach(el => {
-      el.material = mbm
-    })
-    setTimeout(() => {
-      changeSmoke2()
-    }, Math.random() * 5000)
-  }
-  const changeSmoke3 = () => {
-    const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
-    smoke3.group.children.forEach(el => {
-      el.material = mbm
-    })
-    setTimeout(() => {
-      changeSmoke3()
-    }, Math.random() * 5000)
-  }
+  // const changeSmoke1 = () => {
+  //   const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+  //   smoke1.group.children.forEach(el => {
+  //     el.material = mbm
+  //   })
+  //   setTimeout(() => {
+  //     changeSmoke1()
+  //   }, Math.random() * 5000)
+  // }
+  // const changeSmoke2 = () => {
+  //   const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+  //   smoke2.group.children.forEach(el => {
+  //     el.material = mbm
+  //   })
+  //   setTimeout(() => {
+  //     changeSmoke2()
+  //   }, Math.random() * 5000)
+  // }
+  // const changeSmoke3 = () => {
+  //   const mbm = new THREE.MeshBasicMaterial({color: randomColor()})
+  //   smoke3.group.children.forEach(el => {
+  //     el.material = mbm
+  //   })
+  //   setTimeout(() => {
+  //     changeSmoke3()
+  //   }, Math.random() * 5000)
+  // }
 
-  changeSmoke2()
+  // changeSmoke2()
 
   // 漏水绳子
   const rope1 = new Rope({
@@ -132,9 +137,9 @@ function runCabinet() {
     target3.material = mbm
   }
 
-  setInterval(() => {
-    changeRope()
-  }, 3000)
+  // setInterval(() => {
+  //   changeRope()
+  // }, 3000)
 
   // 服务器
   for (let i = 0; i < config.maxServerCount; i++) {
