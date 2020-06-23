@@ -2,7 +2,7 @@ const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebapckPlugin = require('html-webpack-plugin');
 module.exports = {
-  entry: {index: path.join(__dirname, 'src/main.js')},
+  entry: {index: path.join(__dirname, 'org/index.js')},
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name].[hash:6].js',
@@ -10,7 +10,7 @@ module.exports = {
   },
   plugins:[
     new HtmlWebapckPlugin({
-      template: path.resolve(__dirname, 'main.html'),
+      template: path.resolve(__dirname, 'index.html'),
       filename: `index.html`,
       chunks: 'index',
       inject: true,
@@ -31,7 +31,7 @@ module.exports = {
       {
         test: /\.m?js$/,
         exclude: /(node_modules|bower_components)/,
-        include: path.resolve(__dirname, 'src'),
+        include: path.resolve(__dirname, 'org'),
         use: [{
             loader: 'thread-loader',
             options: {
