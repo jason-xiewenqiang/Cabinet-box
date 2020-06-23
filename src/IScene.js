@@ -80,7 +80,7 @@ class IScene {
   initWave() {
     var PI2 = Math.PI * 2
     var mt = new THREE.PointCloudMaterial({
-      color: '#0063f5',
+      color: 0xe0e0e0,
       program: function (context) {
         context.beginPath()
         context.arc(0, 0, 16, 0, PI2)
@@ -131,12 +131,6 @@ class IScene {
     this.controls = new THREE.OrbitControls(this.camera)
     this.controls.addEventListener('change', this.render.bind(this))
     this.controls.maxDistance = 2000
-    //上下翻转的最大角度
-    this.controls.maxPolarAngle = 1.5
-    //上下翻转的最小角度
-    this.controls.minPolarAngle = 0.3
-    //是否允许缩放
-    this.controls.enableZoom = false
   }
 
   onResize() {

@@ -1,0 +1,64 @@
+* {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+canvas {
+  margin: 0;
+  padding: 0;
+}
+.three-cabinet-info {
+  z-index: 1;
+  position: absolute;
+  left: calc(50% - 280px);
+  bottom: 5%;
+  width: auto;
+  height: auto;
+  display: flex;
+  border-radius: 30px;
+  overflow: hidden;
+}
+.three-cabinet-info > div {
+  width: 180px;
+  height: 60px;
+  background-color: #007aff;
+}
+.three-cabinet-info > div li {
+  height: 16px;
+  font-size: 12px;
+  color: #fff;
+  text-align: center;
+  margin-top: 2px;
+}
+.three-cabinet-info .info-item:nth-child(2) {
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+.box {
+  width: 1098px;
+  height: 728px;
+  position: relative;
+}
+.three-cabinet-info > div li img {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: top;
+}
+.three-camera {
+  z-index: 1;
+  position: absolute;
+  left: calc(50% - 240px);
+  top: 3%;
+  width: auto;
+  height: auto;
+  display: flex;
+  border-radius: 30px;
+  overflow: hidden;
+}
+.three-camera img {
+  width: 50px;
+  height: 100%;
+}

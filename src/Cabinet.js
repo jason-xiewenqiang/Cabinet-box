@@ -1,14 +1,14 @@
-import { loadTexture } from './utils'
 
 class Cabinet {
   _bottomWidth = 30 // 宽
   _bottomLength = 40 // 长
-  constructor(x, z, cabNumber, sceneInstance) {
-    this.x = x
-    this.z = z
+  constructor(params) {
+    this.x = params.x
+    this.z = params.z
     this.y = 0
-    this.number = cabNumber
-    this.buildBox(sceneInstance)
+    this.number = params.name
+    this.resourceID = params.id
+    this.buildBox(params.scene)
   }
 
   buildBox(sceneInstance) {
@@ -113,11 +113,14 @@ class Cabinet {
     cabTop.name = 'cabTop'
 
     cabGroup.add(cabBottom, cabLeft, cabRight, cabBack, cabTop)
+    cabGroup.name = this.number // 绑定一下整体的名称
+    cabGroup.resource_id = this.resourceID // 绑定一下整体的id
 
     // 机箱门
     const cabDoorGroup = new THREE.Group()
     cabDoorGroup.position.set(this.x + 15, this.y, this.z + 20)
-    cabDoorGroup.name = this.number
+    cabDoorGroup.name = this.number// 绑定一下整体的名称
+    cabDoorGroup.resource_id = this.resourceID // 绑定一下整体的id
 
     const doorGeo = new THREE.BoxGeometry(this._bottomWidth, 92, 1)
     const doorMaterials = []

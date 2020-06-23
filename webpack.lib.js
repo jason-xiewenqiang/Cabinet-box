@@ -20,6 +20,7 @@ module.exports = {
       new CopyWebpackPlugin({patterns: [{from: 'js/*.js', to: ''}]}),
       new CopyWebpackPlugin({patterns: [{from: 'main.html', to: ''}]}),
       new CopyWebpackPlugin({patterns: [{from: 'images/*.png', to: ''}]}),
+      new CopyWebpackPlugin({patterns: [{from: 'css/*.css', to: ''}]}),
       new CopyWebpackPlugin({patterns: [{from: 'images/*.svg', to: ''}]})
     ],
     module: {
@@ -49,7 +50,7 @@ module.exports = {
         minimizer: [
             new TerserPlugin({ // 遇见es6会进行转换
                 include: /\.min\.js$/
-            }),
+            })
         ]
     }
 }

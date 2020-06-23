@@ -15,7 +15,6 @@ class Rope {
     // const texture = loadTexture('images/rope.jpg', () => { sceneInstance.render() })
     const material = new THREE.MeshBasicMaterial({
       color: 0x4ebaff
-      // color: '#ee3030'
     })
 
     const p1 = new THREE.Vector3(-12, 0, 18.5)
