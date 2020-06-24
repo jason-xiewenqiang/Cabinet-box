@@ -8,7 +8,7 @@
 // --------------- 初始化controls
 import { loadTexture } from '../src/utils'
 class Scene {
-  constructor(selector = null, dev = true) {
+  constructor(selector = null, dev = true, cabNumber = 5, callback = null) {
     console.log('initial Scene.')
     this.container = selector ? document.querySelector(selector) : null // 是否有容器
     this.width = this.container ? this.container.offsetWidth : window.innerWidth
@@ -16,11 +16,11 @@ class Scene {
     this.dev = dev // 是否开发模式
     this.scene = new THREE.Scene()
     this.scene.position.set(0, -40, 0)
-    this.camera = this.initCamera()
+    this.camera = this.initCamera(cabNumber)
     this.initLight()
     this.initRenderer()
     this.initTexture()
-    this.initFloor()
+    this.initFloor(cabNumber)
 
     // 粒子效果相关参数
     this.particle = null
@@ -42,13 +42,13 @@ class Scene {
     this.initControls()
     this.animate()
     window.addEventListener('resize', this.onResize.bind(this), false)
-    
+    window.addEventListener('dblclick', this.injectHandler.bind(this, callback), false)
   }
 
   // 摄像头
-  initCamera() {
-    const camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 10000)
-    camera.position.set(0, 30, 200)
+  initCamera(cabNumber) {
+    const camera = new THREE.PerspectiveCamera(cabNumber > 5 ? 60 : 45, this.width / this.height, 1, 10000)
+    camera.position.set(0, cabNumber > 5 ? 5 : 15, 200)
     return camera
   }
 
@@ -57,14 +57,14 @@ class Scene {
     this.dircLight = new THREE.DirectionalLight(0xffffff)
     this.dircLight.position.set(300, 400, 200)
     this.scene.add(this.dircLight)
-    var hemi = new THREE.HemisphereLight(0x003073, 0x029797, 0.75)
+    const hemi = new THREE.HemisphereLight(0x003073, 0x029797, 0.75)
     hemi.position.set(0.5, 1, 0.75)
     this.scene.add(hemi)
   }
 
   // 地板
-  initFloor() {
-    const geometry = new THREE.BoxGeometry(450, 0, 300)
+  initFloor(cabNumber) {
+    const geometry = new THREE.BoxGeometry(cabNumber > 5 ? 600 : 300, 0, cabNumber > 5 ? 250 : 200)
     const material = new THREE.MeshLambertMaterial({
       color: 0xffffff,
       map: this.floorTexture,
@@ -75,6 +75,14 @@ class Scene {
     this.scene.add(this.floor)
   }
 
+  // 材质
+  initTexture() {
+    this.floorTexture = loadTexture('images/floor.png', () => { this.render() })
+    this.floorTexture.wrapS = THREE.RepeatWrapping
+    this.floorTexture.wrapT = THREE.RepeatWrapping
+    this.floorTexture.repeat.set(1, 1)
+  }
+
   // 渲染器
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer({
@@ -83,14 +91,6 @@ class Scene {
     this.renderer.setSize(this.width, this.height)
     this.renderer.setClearColor('#0b0c0f')
     this.container ? this.container.appendChild(this.renderer.domElement) : document.body.appendChild(this.renderer.domElement)
-  }
-
-  // 材质
-  initTexture() {
-    this.floorTexture = loadTexture('images/floor.png', () => { this.render() })
-    this.floorTexture.wrapS = THREE.RepeatWrapping
-    this.floorTexture.wrapT = THREE.RepeatWrapping
-    this.floorTexture.repeat.set(1, 1)
   }
 
   // 粒子效果
@@ -123,7 +123,7 @@ class Scene {
     for (let ix = 0; ix < this.AMOUNTX; ix++) {
       for (let iy = 0; iy < this.AMOUNTY; iy++) {
         this.particle = this.particles[i++]
-        this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 300
+        this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 400
         this.particle.scale.x = this.particle.scale.y = (Math.sin((ix + this.count) * 0.3) + 1) * 2 + (Math.sin((iy + this.count) * 0.5 + 1) * 2)
       }
     }
@@ -136,9 +136,9 @@ class Scene {
     this.controls = new THREE.OrbitControls(this.camera)
     this.controls.addEventListener('change', this.render.bind(this))
     this.controls.maxDistance = 2000
-    this.controls.maxPolarAngle = 1.5
-    this.controls.minPolarAngle = 0.5
-    this.controls.enableZoom = false
+    // this.controls.maxPolarAngle = 1.5
+    // this.controls.minPolarAngle = 0.5
+    // this.controls.enableZoom = false
   }
 
   // resize
@@ -165,6 +165,49 @@ class Scene {
     this.render()
     if (this.dev) { this.stats.update() }
     requestAnimationFrame(this.animate.bind(this))
+  }
+
+  // 注册器
+  injectHandler(callback, event) {
+    const width = window.innerWidth
+    const height = window.innerHeight
+    event.preventDefault()
+    let vector = new THREE.Vector3( (event.clientX / width) * 2 - 1, -(event.clientY / height) * 2 + 1, 0.5 )
+    vector = vector.unproject(this.camera)
+    const raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize())
+    const intersects = raycaster.intersectObjects(this.scene.children, true)
+    const firstObj = intersects[0].object
+
+    if (callback && callback instanceof Function) {
+      callback(firstObj.parent)
+    }
+
+    if (firstObj.name === 'front-door') {
+      if (firstObj.parent.rotation.y == 0) {
+        new TWEEN.Tween(firstObj.parent.rotation).to({ y: 0.6 * Math.PI }, 1500).easing(TWEEN.Easing.Elastic.Out).start()
+      } else {
+        new TWEEN.Tween(firstObj.parent.rotation).to({ y: 0 }, 300).start()
+      }
+      this.controls.update()
+    }
+    if (firstObj.name === 'back-door') {
+      if (firstObj.parent.rotation.y == 0) {
+        new TWEEN.Tween(firstObj.parent.rotation).to({ y: 0.6 * Math.PI }, 1500).easing(TWEEN.Easing.Elastic.Out).start()
+      } else {
+        new TWEEN.Tween(firstObj.parent.rotation).to({ y: 0 }, 300).start()
+      }
+      this.controls.update()
+    }
+
+  //   if(firstObj.name === 'server'){
+  //      if(firstObj.parent.position.z === 0){
+  //          new TWEEN.Tween( firstObj.parent.position ).to({ z: firstObj.parent.position.z + 20 }, 500 ).easing( TWEEN.Easing.Elastic.Out).start()
+  //      }else{
+  //          new TWEEN.Tween( firstObj.parent.position ).to({ z: firstObj.parent.position.z - 20 }, 500 ).easing( TWEEN.Easing.Elastic.Out).start()
+  //      }
+  //      this.controls.update()
+  //  }
+    this.render()
   }
 }
 

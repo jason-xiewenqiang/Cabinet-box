@@ -1,3 +1,13 @@
+export const colors = {
+  warning: '#F56C6C',
+  normal: 0x007aff
+}
+
+export const colorRGB = {
+  warning: 'rgba(255, 108, 108, 1)',
+  normal: 'rgba(0, 122, 255, 1)'
+}
+
 export const SceneData = {
   position: {
     x: 0,
