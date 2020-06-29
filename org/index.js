@@ -10,7 +10,7 @@ import Cabinet from './Cabinet'
  * @returns {Scene} scene 场景对象
  */
 function init(selector, options, callback) {
-  const count = 5
+  const count = 10
   const Is = new Scene(null, false, count)
 
   // 机柜参数设置
@@ -22,7 +22,18 @@ function init(selector, options, callback) {
     id: '0_528',
     width: 30,
     length: 40,
-    height: 100
+    height: 100,
+    server: {
+      count: 10,
+      h: 8,
+      thickness: 2
+    },
+    switch: {
+      count: 1,
+      h: 8,
+      thickness: 6
+    }
+
   }
 
   let x = 9

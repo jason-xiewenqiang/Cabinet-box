@@ -15,7 +15,7 @@ class Scene {
     this.height = this.container ? this.container.offsetHeight : window.innerHeight
     this.dev = dev // 是否开发模式
     this.scene = new THREE.Scene()
-    this.scene.position.set(0, -40, 0)
+    this.scene.position.set(0, -50, 0)
     this.camera = this.initCamera(cabNumber)
     this.initLight()
     this.initRenderer()
