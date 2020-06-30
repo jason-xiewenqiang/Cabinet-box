@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js canvas - particles - waves</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            background-color: #193c6d;
+            background-size: 100%;
+            background-image: linear-gradient(135deg, #003073, #029797);
+            text-align: center;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #label-can {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            /* transform: translate(-50%, -50%); */
+        }
+
+        .div-label {
+            height: 40px;
+            width: 40px;
+            background-color: #007aff55;
+            color: white;
+            border-radius: 8px;
+            line-height: 40px;
+            margin-top: -40px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="./js/three.min.js"></script>
+    <script type="module">
+        import * as THREE from './threes/build/three.module.js';
+        import { CSS2DRenderer, CSS2DObject } from './threes/examples/jsm/renderers/CSS2DRenderer.js';
+        var SEPARATION = 80,
+            AMOUNTX = 100,
+            AMOUNTY = 70;
+
+        var container;
+        var camera, scene, renderer;
+
+        var particles, particle, count = 0;
+
+        var mouseX = 85,
+            mouseY = -342; 
+
+        var windowHalfX = window.innerWidth / 2;
+        var windowHalfY = window.innerHeight / 2;
+
+        var labelCan, labelCtx, label, testNum = 0
+        var box1, box2, line, group, divLable, divLable2, labelRenderer
+
+        initUtil()
+        init();
+
+        // render()
+
+        animate();
+
+        function initUtil() {
+            Rect.prototype = {
+                _init: function (option) {
+                    this.x = option.x || 0;   //x ,y 坐标
+                    this.y = option.y || 0;
+                    this.h = option.h || 0;      // 矩形的宽高
+                    this.w = option.w || 0;
+                    this.rotation = option.rotation || 0;  //矩形的旋转
+                    // 设置矩形的透明度
+                    this.opacity = option.opacity === 0 ? 0 : option.opacity || 1;
+                    this.scaleX = option.scaleX || 1;//设置矩形的 放到缩小
+                    this.scaleY = option.scaleY || 1;
+                    this.strokeStyle = option.strokeStyle || 'red';//划线颜色
+                    this.fillStyle = option.fillStyle || 'blue';//填充颜色
+                },
+                render: function (ctx) {
+                    ctx.save();// 把当前的上下文的状态保存一下
+                    ctx.beginPath();//开始一个新的路径
+                    ctx.translate(this.x, this.y);  //把整个画布进行位移,让图片以新画布原点为原点
+                    ctx.rotate(this.rotation * Math.PI / 180);//把整个画布进行旋转
+                    ctx.globalAlpha = this.opacity;//设置透明度
+                    ctx.scale(this.scaleX, this.scaleY);//设置画布缩小放大
+                    //给 ctx规划一个路径。注意：规划的路径会一直保存。所以
+                    //最好在每次绘制矩形的时候beginPath一下标志一个新的路径。
+                    ctx.rect(0, 0, this.w, this.h);
+                    ctx.fillStyle = this.fillStyle;
+                    ctx.fill();
+
+                    ctx.strokeStyle = this.strokeStyle;
+                    ctx.stroke();
+                    ctx.restore();//还原绘制的状态
+                }
+            }
+        }
+        function init() {
+
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.z = 1000;
+
+            scene = new THREE.Scene();
+
+            //  增加label
+            labelCan = document.createElement('canvas')
+            labelCan.width = 64
+            labelCan.height = 64
+            labelCan.id = "label-can"
+            labelCtx = labelCan.getContext('2d')
+
+            document.body.appendChild(updateLabelCanvas())
+
+            // 立方体网格模型
+            var box = new THREE.BoxGeometry(300, 300, 300);
+            var labelMaterial = getLabelMaterial()
+            box1 = new THREE.Mesh(box, labelMaterial);
+            box2 = box1.clone()
+
+            // 立方体几何体box作为EdgesGeometry参数创建一个新的几何体
+            var edges = new THREE.EdgesGeometry(box, 16);
+
+            // 立方体线框，不显示中间的斜线
+            var edgesMaterial = new THREE.LineBasicMaterial({
+                color: 0x007aff,
+                linewidth: 1,
+                linecap: "round",
+                linejoin: "round",
+            })
+            line = new THREE.LineSegments(edges, edgesMaterial);
+
+            var line2 = line.clone()
+
+            divLable = document.createElement("div")
+            divLable.className = "div-label"
+            divLable.innerText = testNum
+            divLable = new CSS2DObject(divLable)
+
+            divLable2 = document.createElement("div")
+            divLable2.className = "div-label"
+            divLable2.innerText = testNum
+            divLable2 = new CSS2DObject(divLable2)
+
+            group = new THREE.Group();
+            box1.add(divLable)
+            group.add(box1)
+            group.add(line)
+
+            var group2 = new THREE.Group();
+            line2.position.set(300, 0, 0)
+            box2.add(divLable2)
+            box2.position.set(300, 0, 0)
+            group.add(box2)
+            group.add(line2)
+            scene.add(group)
+
+            particles = new Array();
+
+            const can = document.createElement('canvas')
+            can.id = "label-can"
+            can.height = 32
+            can.width = 32
+
+            const ctx = can.getContext('2d')
+            ctx.clearRect(0,0,32,32)
+            ctx.beginPath();
+            ctx.fillStyle = "#ffffff"
+            var PI2 = Math.PI * 2;
+            ctx.arc(16, 16, 32, 0, PI2, true);
+            ctx.fill();
+
+            var texture = new THREE.Texture(can)
+
+            texture.needsUpdate = true
+            var material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true
+            });
+
+            var i = 0;
+
+            for (var ix = 0; ix < AMOUNTX; ix++) {
+                for (var iy = 0; iy < AMOUNTY; iy++) {
+                    particle = particles[i++] = new THREE.Sprite(material);
+                    particle.position.x = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2);
+                    particle.position.z = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2);
+                    scene.add(particle);
+                }
+            }
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setClearColor(0xEEEEEE, 0.0);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.domElement.id = "3d-can"
+            container.appendChild(renderer.domElement);
+
+
+            // 下面是 css的渲染
+            labelRenderer = new CSS2DRenderer(); //新建CSS2DRenderer 
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = 0;
+            container.appendChild(labelRenderer.domElement);
+
+            window.addEventListener('resize', onWindowResize, false);
+
+        }
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function updateLabelCanvas() {
+            labelCtx.fillStyle = 0x007aff
+            var rect = new Rect({
+                x: 0, y: 0, h: labelCan.height, w: labelCan.width
+            })
+            var radius = [16, 0, 0, 16]
+            var stroke = {
+                style: "#007aff",
+                width: 2
+            }
+
+            var fill = {
+                style: "#007aff33",
+            }
+            drawRoundedRect(rect, radius, stroke, fill, labelCtx);
+
+            var txt = {
+                con: "测试",
+                font: "14px Microsoft YaHei",
+                fill: {
+                    x: 8,
+                    y: 8,
+                    align: "left",
+                    baseline: "top",
+                    style: "#ffffff",
+                }
+            }
+            drawText(txt, labelCtx)
+
+            var numTxt = {
+                con: testNum.toFixed(1),
+                font: "14px Microsoft YaHei",
+                fill: {
+                    x: 40,
+                    y: 8,
+                    align: "left",
+                    baseline: "top",
+                    style: "#ffffff",
+                }
+            }
+            drawText(numTxt, labelCtx)
+            return labelCan
+        }
+
+        function getLabelMaterial() {
+            var texture = new THREE.Texture(updateLabelCanvas())
+            texture.needsUpdate = true
+            return new THREE.MeshBasicMaterial({
+                map: texture, //像素形状
+                transparent: true,
+            })
+        }
+
+        /*
+            1、 封装属性：  x， y  w ， h，  fillStyle  strokeStyle  rotation  opacity
+            2、render
+        */
+        function Rect(option) {
+            this._init(option)
+        }
+
+        function drawRoundedRect(rect, radius, stroke, fill, ctx) {
+
+            var ptA = Point(rect.x + radius[0], rect.y);
+            var ptB = Point(rect.x + rect.w, rect.y);
+            var ptC = Point(rect.x + rect.w, rect.y + rect.h);
+            var ptD = Point(rect.x, rect.y + rect.h);
+            var ptE = Point(rect.x, rect.y);
+
+            ctx.beginPath();
+
+            ctx.moveTo(ptA.x, ptA.y);
+            ctx.arcTo(ptB.x, ptB.y, ptC.x, ptC.y, radius[1]);
+            ctx.arcTo(ptC.x, ptC.y, ptD.x, ptD.y, radius[2]);
+            ctx.arcTo(ptD.x, ptD.y, ptE.x, ptE.y, radius[3]);
+            ctx.arcTo(ptE.x, ptE.y, ptA.x, ptA.y, radius[0]);
+
+            if (stroke) {
+                ctx.strokeStyle = stroke.style
+                ctx.linewidth = stroke.width
+                ctx.stroke();
+            }
+
+            if (fill) {
+                ctx.fillStyle = fill.style
+                ctx.fill();
+            }
+
+            function Point(x, y) {
+                return { x: x, y: y };
+            };
+        }
+
+        function drawText(text, ctx) {
+            ctx.font = text.font
+            ctx.beginPath();
+            ctx.textAlign = text.fill.align;
+            ctx.textBaseline = text.fill.baseline;
+            ctx.fillStyle = text.fill.style;
+            ctx.fillText(text.con, text.fill.x, text.fill.y);
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        var angle = 0
+        var once = true
+        function render() {
+            labelCtx.clearRect(0, 0, 100, 100)
+            testNum += 0.01
+            box1.material = getLabelMaterial()
+            box2.material = getLabelMaterial()
+            divLable.element.innerText = testNum.toFixed(1)
+            divLable2.element.innerText = testNum.toFixed(1)
+            if (once) console.log(divLable)
+            once = false
+            angle += 0.01
+            group.rotation.y = angle
+            camera.position.x += (mouseX - camera.position.x) * .05;
+            camera.position.y += (-mouseY - camera.position.y) * .05;
+            camera.lookAt(scene.position);
+            var i = 0;
+            for (var ix = 0; ix < AMOUNTX; ix++) {
+                for (var iy = 0; iy < AMOUNTY; iy++) {
+                    particle = particles[i++];
+                    particle.position.y = (Math.sin((ix + count) * 0.3) * 50) + (Math.sin((iy + count) * 0.5) * 50);
+                    particle.scale.x = particle.scale.y = (Math.sin((ix + count) * 0.3) + 1) * 2 + (Math.sin((iy + count) * 0.5) + 1) * 2;
+                }
+            }
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+            count += 0.1;
+        }
+    </script>
+</body>
+
+</html>

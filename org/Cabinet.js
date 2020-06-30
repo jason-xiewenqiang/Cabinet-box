@@ -1,15 +1,9 @@
 import { colors, colorRGB } from './Config'
-import Info from './Info'
+// import Info from './Info'
 import Camera from './Camera'
-// 创建机柜
-// --------------- 机柜外壳-前门
-// --------------- 机柜外壳-后门
-// --------------- 机柜外壳-侧边（左右）
-// --------------- 机柜外壳-底座
-// --------------- 机柜外壳-顶盖
-// --------------- 机柜U位计算
-// --------------- 机柜漏水绳子
-// --------------- 机柜烟感
+// import Label from './Label'
+import WSD from './WSD'
+
 class Cabinet {
   constructor(options) {
     this.options = options
@@ -46,29 +40,29 @@ class Cabinet {
     const smoke = this.smoke()
     this.group.add(smoke)
 
+    // 温湿度
+    const wsd = new WSD(this.options)
+    this.group.add(wsd.group)
     // const info = new Info(this.options)
     // this.group.add(info.group)
 
-    // const camera = new Camera(this.options)
-    // this.group.add(camera.group)
+    const camera = new Camera(this.options)
+    this.group.add(camera.group)
 
     // 服务器
-    // for (let i = 0; i < 8; i++) {
-    //   const h = 24 + i * 6 // 服务器的高度 2 间隔 2 最低U位距离 原点 y = 8
-    //   const thickness = 2 // 服务器的厚度
-    //   const server = this.server(h, thickness)
-    //   this.group.add(server)
-    // }
+    for (let i = 0; i < 12; i++) {
+      const h = 24 + i * 6 // 服务器的高度 2 间隔 2 最低U位距离 原点 y = 8
+      const thickness = 2 // 服务器的厚度
+      const server = this.server(h, thickness)
+      this.group.add(server)
+    }
 
-    // const server = this.server(40, 2)
-    // this.group.add(server)
-    
-    // 交换机
-    // const sw = this.switchs(8, 8)
-    // this.group.add(sw)
+    // // 交换机
+    const sw = this.switchs(8, 8)
+    this.group.add(sw)
 
-    // const sw1 = this.switchs(18, 6)
-    // this.group.add(sw1)
+    const sw1 = this.switchs(18, 6)
+    this.group.add(sw1)
   }
 
   topBoard() {
@@ -141,6 +135,9 @@ class Cabinet {
     const door = new THREE.Mesh(geo, mesh)
     door.name = 'front-door'
     door.position.set(-this.width / 2, 50, 0)
+
+    // const info = new Label({x: 0, y: 0, z: 0, text: 'aaaaaaaa'})
+    // group.add(info.box)
     group.add(door)
     return group
   }
@@ -256,7 +253,7 @@ class Cabinet {
       color: 0x007aff,
       transparent: true,
       side: THREE.DoubleSide,
-      opacity: 1
+      opacity: 0.4
     })
     const geo = new THREE.BoxGeometry(this.width + 4, 2, this.length)
     const bottomBoard = new THREE.Mesh(geo, basicMaterial)
@@ -342,14 +339,13 @@ class Cabinet {
       side: THREE.DoubleSide,
     })
     const switchBody = new THREE.Mesh(switchGeo, switchMat)
+    switchBody.name = 'switch'
     switchBody.position.set(0, h, 0)
     switchGroup.add(switchBody)
     return switchGroup
   }
 
-  renderServerAndSwitch(server, sws) {
-
-  }
+  renderServerAndSwitch(server, sws) { }
 
   gradientTexure() {
     const canvas = document.createElement("canvas")

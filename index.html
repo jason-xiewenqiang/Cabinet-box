@@ -9,6 +9,8 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+    }
+    html, body {
       height: 100%;
       width: 100%;
     }
@@ -60,6 +62,64 @@
       border-radius: 30px;
       overflow: hidden;
     }
+    #label-canvas {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      width: 100px;
+      height: 100px;
+    }
+    .text-label {
+        height: auto;
+        width: auto;
+        /* background: url('./images/bg.svg'); */
+        color: white;
+        border-radius: 8px;
+        line-height: 40px;
+        margin-top: -45px;
+    }
+    .text-img {
+      display: inline-block;
+      width: 47px;
+      height: 63px;
+      background: 100% 100% no-repeat url('./images/xiao.png');
+    }
+    .text-outer {
+      height: 170px;
+      width: 170px;
+      background: 100% 100% no-repeat url('./images/bg1.svg');
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 75px;
+    }
+    .text-outer h3 {
+      text-align: center;
+      margin-bottom: 2px;
+      font-size: 12px;
+    } 
+    .text-wsd {
+      position: relative;
+      top: -2px;
+    }
+    .text-wsd p {
+      font-size: 12px;
+    }
+    .text-wsd .wd span {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: url('./images/xbr-icon-cld-wd.svg');
+      vertical-align: middle;
+    }
+    .text-wsd .sd span {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: url('./images/xbr-icon-cld-sd.svg');
+    }
   </style>
 </head>
 <body>
@@ -67,5 +127,7 @@
   <script src="./js/OrbitControls.js"></script>
   <script src="./js/tween.js"></script>
   <script src="./js/Stats.js"></script>
+  <script src="./js/CSS2DRenderer.js"></script>
+  <!-- <script src="./js/jquery.js"></script> -->
 </body>
 </html>

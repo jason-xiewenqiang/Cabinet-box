@@ -1,25 +1,40 @@
-class Info {
+class Label {
   constructor(options) {
     this.x = options.x
     this.y = options.y
     this.z = options.z
     this.text = options.text
-    this.box = this.build(64, 64)
+    this.box = this.build()
   }
 
-  build (width, height, text) {
+  build () {
     const labelCanvas = document.createElement('canvas')
-    labelCanvas.width = width
-    labelCanvas.height = height
+    labelCanvas.width = 64
+    labelCanvas.height = 64
     labelCanvas.id = 'label-canvas'
     const labelCtx = labelCanvas.getContext('2d')
+    // document.body.appendChild(this.updateLabelCanvas(labelCanvas, labelCtx, 0))
 
+    // box
     const labelMaterial = this.getLabelMaterial(labelCanvas, labelCtx, 0)
     const box = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 0.0001), labelMaterial)
-
-    box.position.set(this.x, this.y + 20, this.z + 40)
+    // const cssLabel = this.createLabel('sss金凤凰撒的发生的纠纷雷克萨绝地反击ss')
+    // box.add(cssLabel)
+    box.position.set(this.x - 7.5, this.y + 10, this.z + 0.0001)
     
     return box
+  }
+  
+  createLabel (text) {
+    const label = document.createElement('div')
+    const imgDOM = document.createElement('div')
+    const spanDOM = document.createElement('span')
+    imgDOM.className = 'text-img'
+    label.className = 'text-label'
+    spanDOM.innerText = text
+    label.appendChild(imgDOM)
+    label.appendChild(spanDOM)
+    return new THREE.CSS2DObject(label)
   }
   
   getLabelMaterial(labelCanvas, labelCtx) {
@@ -134,4 +149,4 @@ class Rect {
   }
 }
 
-export default Info
+export default Label

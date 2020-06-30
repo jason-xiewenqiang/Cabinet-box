@@ -1,5 +1,6 @@
 import Scene from './Scene'
 import Cabinet from './Cabinet'
+import Label from './Label'
 
 /**
  * @description 入口
@@ -10,7 +11,7 @@ import Cabinet from './Cabinet'
  * @returns {Scene} scene 场景对象
  */
 function init(selector, options, callback) {
-  const count = 10
+  const count = 3
   const Is = new Scene(null, false, count)
 
   // 机柜参数设置
@@ -36,6 +37,9 @@ function init(selector, options, callback) {
 
   }
 
+  // const box = new Label(cabinetSetting).box
+  // Is.scene.add(box)
+
   let x = 9
   let dx = -9
   // 偶数个
@@ -48,8 +52,8 @@ function init(selector, options, callback) {
     }
   } else {
     // 奇数个
-    Is.scene.add(new Cabinet(cabinetSetting).group)
-    for (let i = 0; i < Math.fround(count/2); i++) {
+    Is.scene.add(new Cabinet(cabinetSetting).group)  // i = 0
+    for (let i = 1; i < Math.fround(count/2); i++) {
       cabinetSetting.x = 18 * i
       Is.scene.add(new Cabinet(cabinetSetting).group)
       cabinetSetting.x = - 18 * i
@@ -60,7 +64,17 @@ function init(selector, options, callback) {
   return Is
 }
 
-
 init()
+startWork()
+
+function startWork() {
+  const worker = new Worker('./js/server.worker.js')
+  worker.postMessage('getResource')
+  worker.onmessage = function (event) {
+    console.log(event)
+  }
+}
+
+
 
 export default init
