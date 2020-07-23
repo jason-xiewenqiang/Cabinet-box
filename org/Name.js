@@ -3,10 +3,10 @@
  * @Email: xiewenqiang@xbrother.com
  * @Date: 2020-06-29 17:19:28
  * @LastEditors: jason-xiewenqiang
- * @LastEditTime: 2020-07-20 18:37:52
- * @Description: 温湿度面板显示
+ * @LastEditTime: 2020-07-20 18:38:57
+ * @Description: 名称面板显示
  */
-class WSD {
+class Name {
   constructor(options) {
     this.options = options
     this.x = options.x
@@ -29,7 +29,7 @@ class WSD {
 
     const cssLabel = this.createLabel()
     mesh.add(cssLabel)
-    mesh.position.set(0, 2, 40)
+    mesh.position.set(0, 2, 30)
     mesh.rotateX(Math.PI / 2)
     group.add(mesh)
     return group
@@ -39,16 +39,14 @@ class WSD {
     const label = document.createElement('div')
     const html = `
       <h3 class="name">${this.options.name}</h3>
-      <p class="wd"><span></span><i class="wd-val">37.5</i> ℃</p>
-      <p class="sd"><span></span><i class="sd-val">23.5</i> %</p>
     `
     const text = document.createElement('div')
-    text.className = 'text-wsd'
+    text.className = 'text-name'
     text.innerHTML = html
-    label.className = 'text-outer'
+    label.className = 'text-outer-name'
     label.appendChild(text)
     return new THREE.CSS2DObject(label)
   }
 }
 
-export default WSD
+export default Name

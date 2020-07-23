@@ -2,7 +2,8 @@ import { colors, colorRGB } from './Config'
 // import Info from './Info'
 import Camera from './Camera'
 // import Label from './Label'
-import WSD from './WSD'
+// import WSD from './WSD'
+import Name from './Name'
 
 class Cabinet {
   constructor(options) {
@@ -14,12 +15,13 @@ class Cabinet {
     this.length = options.length // 长
     this.height = options.height // 高
     this.name = options.name
-    this.resource_id = options.id
+    this.resource_id = options.resource_id
     this.build()
   }
 
   build() {
     this.group = new THREE.Group()
+    this.group.resource_id = this.resource_id
     this.group.position.set(this.x, this.y, this.z)
     this.group.name = this.name
     
@@ -35,34 +37,45 @@ class Cabinet {
     this.group.add(fDoor)
     const bDoor = this.backDoor()
     this.group.add(bDoor)
-    const rope = this.rope()
-    this.group.add(rope)
+    
     const smoke = this.smoke()
     this.group.add(smoke)
 
-    // 温湿度
-    const wsd = new WSD(this.options)
-    this.group.add(wsd.group)
-    // const info = new Info(this.options)
-    // this.group.add(info.group)
-
-    const camera = new Camera(this.options)
-    this.group.add(camera.group)
-
-    // 服务器
-    for (let i = 0; i < 12; i++) {
-      const h = 24 + i * 6 // 服务器的高度 2 间隔 2 最低U位距离 原点 y = 8
-      const thickness = 2 // 服务器的厚度
-      const server = this.server(h, thickness)
-      this.group.add(server)
+    const cName = new Name(this.options)
+      this.group.add(cName.group)
+    
+    // 只有第一个机柜加入摄像头和漏水绳子
+    if (this.options.first) {
+      const rope = this.rope()
+      this.group.add(rope)
+      const camera = new Camera(this.options)
+      this.group.add(camera.group)
+    } 
+    
+    if (this.options[this.options.resource_id].length) {
+      this.options[this.options.resource_id].forEach((ser, index) => {
+        this.addAsset(ser)
+      })
     }
+  }
 
-    // // 交换机
-    const sw = this.switchs(8, 8)
-    this.group.add(sw)
+  removeAsset(ids) {
+    if (ids && Array.isArray(ids)) {
+      ids.forEach(id => {
+        this.group.children.forEach(child => {
+          if (child.hasOwnProperty('resource_id') && child.resource_id === id) {
+            this.group.remove(child);
+          }
+        })
+      })
+    }
+  }
 
-    const sw1 = this.switchs(18, 6)
-    this.group.add(sw1)
+  addAsset(ser) {
+    let h = Number(ser.u_height) + Number(ser.start_u)
+    let thickness = Number(ser.u_height)
+    let server = this.server(h, thickness, ser.resource_id)
+    this.group.add(server)
   }
 
   topBoard() {
@@ -309,11 +322,11 @@ class Cabinet {
     return group
   }
 
-  server(h, thickness) {
+  server(h, thickness, id) {
     const group = new THREE.Group()
     group.position.set(this.x, this.y, this.z)
 
-    const geo = new THREE.BoxGeometry(30, thickness, 40)
+    const geo = new THREE.BoxGeometry(30, thickness - 0.2, 40)
     const mat = new THREE.MeshBasicMaterial({
       color: 0x4ebaff,
       opacity: 0.7,
@@ -321,13 +334,14 @@ class Cabinet {
       side: THREE.DoubleSide,
     })
     const server = new THREE.Mesh(geo, mat)
-    server.position.set(0, h, 0)
+    server.position.set(0, h - 0.1, 0)
     server.name = 'server'
     group.add(server)
+    group.resource_id = id
     return group
   }
 
-  switchs(h, thickness) {
+  switchs(h, thickness, id) {
     const switchGroup = new THREE.Group()
     switchGroup.position.set(this.x, this.y, this.z)
 
@@ -340,6 +354,8 @@ class Cabinet {
     })
     const switchBody = new THREE.Mesh(switchGeo, switchMat)
     switchBody.name = 'switch'
+    switchGroup.resource_id = id
+
     switchBody.position.set(0, h, 0)
     switchGroup.add(switchBody)
     return switchGroup

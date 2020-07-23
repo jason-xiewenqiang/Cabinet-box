@@ -1,6 +1,5 @@
 import Scene from './Scene'
 import Cabinet from './Cabinet'
-import Label from './Label'
 
 /**
  * @description 入口
@@ -11,70 +10,157 @@ import Label from './Label'
  * @returns {Scene} scene 场景对象
  */
 function init(selector, options, callback) {
-  const count = 3
-  const Is = new Scene(null, false, count)
+  const Is = new Scene(null, false)
+  return { Is }
+}
 
-  // 机柜参数设置
-  const cabinetSetting = {
-    x: 0,
-    y: 0,
-    z: 0,
-    name: 'cabinet1',
-    id: '0_528',
-    width: 30,
-    length: 40,
-    height: 100,
-    server: {
-      count: 10,
-      h: 8,
-      thickness: 2
+var context;
+var assetURL = '/api/v2/mblock/asset/list';
+var cabinetURL = '/api/v2/mblock/asset/allrack';
+var defaultSetting = {
+  x: 0,
+  y: 0,
+  z: 0,
+  name: '',
+  resource_id: '',
+  width: 30,
+  length: 40,
+  height: 100
+}
+var allCabinets = [];
+var worker = null;
+var mapCabinet = {}
+window.onload = async function() {
+  $('.loading').show()
+  const cabinets = await getCabinet(cabinetURL);
+  const assets = await getAssets(assetURL);
+  const settings = mapAssetToCabinet(cabinets, assets);
+  $('.loading').hide()
+  $('.rotate-btn').show()
+  context = init()
+  settings.forEach((setting, index) => {
+    // first参数加入 -- 只有第一个机柜才会有摄像头和漏水绳子
+    let cab = new Cabinet({first: index == 0 ? true : false, ...setting})
+    allCabinets.push(cab)
+    mapCabinet[cab.resource_id] = index
+    context.Is.scene.add(cab.group)
+  })
+
+  worker = new Worker('./js/server.worker.js')
+
+  worker.postMessage('start')
+  worker.onmessage = (event) => {
+    var res = JSON.parse(event.data)
+    if (res) {
+      update(res)
+    }
+  }
+  $('.rotate-btn').on('click', () => {
+    if (context && context.Is) {
+      $('.rotate-btn').text(context.Is.rotate ? '旋转' : '停止旋转')
+      context.Is.setRotate(!context.Is.rotate)
+    }
+  })
+}
+
+window.onbeforeunload = function() {
+  context.Is.destroyed()
+  worker.postMessage('close')
+  worker.terminate()
+  allCabinets = null
+  worker = null
+  mapCabinet = null
+  defaultSetting = null
+  context = null
+}
+
+function update(org) {
+  var needRemove = []
+  for (var k in org) {
+    var cabinet = allCabinets[mapCabinet[k]]
+    if (!cabinet) return 
+    var newIds = org[k].map(it => (it.resource_id))
+    var oldIds = cabinet.options.childIDs.split(',').filter(it => (!!it))
+    oldIds.forEach(id => {
+      if (newIds.indexOf(id) == -1) {
+        needRemove(id)
+      }
+    })
+    org[k].forEach(it => {
+      if (oldIds.indexOf(it.resource_id) == -1) {
+        cabinet.addAsset(it)
+      }
+    })
+    cabinet.removeAsset(needRemove)
+  }
+}
+
+
+
+function getCabinet(url) {
+  let cabinets = []
+  $.ajax({
+    url: url,
+    type: "GET",
+    async: false,
+    contentType: "*/*;charset=UTF-8",
+    processData: false,
+    success: res => {
+      cabinets = res
     },
-    switch: {
-      count: 1,
-      h: 8,
-      thickness: 6
+    error: error => {
+      console.error(error);
     }
-
-  }
-
-  // const box = new Label(cabinetSetting).box
-  // Is.scene.add(box)
-
-  let x = 9
-  let dx = -9
-  // 偶数个
-  if (count % 2 === 0) {
-    for (let i = 0; i < count / 2; i++) {
-        cabinetSetting.x = 18 * i + x
-        Is.scene.add(new Cabinet(cabinetSetting).group)
-        cabinetSetting.x = - 18 * i + dx
-        Is.scene.add(new Cabinet(cabinetSetting).group)
-    }
-  } else {
-    // 奇数个
-    Is.scene.add(new Cabinet(cabinetSetting).group)  // i = 0
-    for (let i = 1; i < Math.fround(count/2); i++) {
-      cabinetSetting.x = 18 * i
-      Is.scene.add(new Cabinet(cabinetSetting).group)
-      cabinetSetting.x = - 18 * i
-      Is.scene.add(new Cabinet(cabinetSetting).group)
-    }
-  }
-
-  return Is
+  })
+  return cabinets
 }
 
-init()
-startWork()
-
-function startWork() {
-  const worker = new Worker('./js/server.worker.js')
-  worker.postMessage('getResource')
-  worker.onmessage = function (event) {
-    console.log(event)
-  }
+function getAssets(url) {
+  let assets = []
+  $.ajax({
+    url: url,
+    type: "GET",
+    async: false,
+    contentType: "*/*;charset=UTF-8",
+    processData: false,
+    success: res => {
+      assets = res
+    },
+    error: error => {
+      console.error(error);
+    }
+  })
+  return assets
 }
 
-
+function mapAssetToCabinet(cabinets, assets) {
+  let cabinetSettings = []
+  let mapObject = {}
+  if (cabinets 
+    && cabinets.hasOwnProperty('racks') 
+    && Array.isArray(cabinets.racks) 
+    && assets 
+    && assets.hasOwnProperty('rows')
+    && Array.isArray(assets.rows)) {
+    let len = cabinets.racks.length
+    let startPointX = - 18 * Math.round(len / 2) + (len % 2 === 0 ? 9 : 18);
+    cabinets.racks.forEach((item, index) => {
+      delete item.free_u
+      const setting = Object.assign({}, defaultSetting, item, {x: startPointX + 18 * index})
+      mapObject[setting.resource_id] = index
+      setting.resource_id = item.resource_id
+      setting[setting.resource_id] = []
+      setting.childIDs = ''
+      cabinetSettings.push(setting)
+    }) 
+    assets.rows.forEach(asset => {
+      let pIndex = mapObject[asset.rack_id]
+      cabinetSettings[pIndex][asset.rack_id].push(asset)
+      cabinetSettings[pIndex].childIDs += asset.resource_id + ','
+    })
+    console.log('cabinetSettings', cabinetSettings)
+  }
+  return cabinetSettings
+}
 
 export default init

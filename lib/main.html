@@ -12,12 +12,17 @@
   <script src="./js/OrbitControls.js"></script>
   <script src="./js/tween.js"></script>
   <script src="./js/Stats.js"></script>
+  <script src="./js/CSS2DRenderer.js"></script>
   <script src="cabinet.js"></script>
   <script>
     window.onload = function() {
-      Cabinet('body', true, (cab) => {
-        window.parent.updatePage(cab.resource_id, false)
-      })
+      // Cabinet('.box', true, (cab) => {
+      //   window.parent.updatePage(cab.resource_id, false)
+      // })
+      var sence = Cabinet('body')
+      setTimeout(function(){
+        sence.destroyed()
+      }, 8000)
     }
   </script>
 </body>

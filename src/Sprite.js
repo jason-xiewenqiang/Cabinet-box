@@ -5,6 +5,7 @@ class Sprite {
     this.scene.position.set(0, -40, 10)
     this.camera = this.initCamera(params.parent)
     this.canControl = false
+    
 
     // 粒子效果相关参数
     this.particle = null
@@ -21,8 +22,23 @@ class Sprite {
 
     this.initWave()
     this.render()
-    this.animate()
+    this.animationID =  this.animate()
     window.addEventListener('resize', this.onResize.bind(this, params.parent), false)
+  }
+
+  destroyed() {
+    window.cancelAnimationFrame(this.animationID)
+    this.scene = null
+    this.camera = null
+    this.particle = null
+    this.particles = []
+    this.dircLight = null
+    this.dev = null
+    window.removeEventListener('resize', ()=>{})
+    if (this.parent) {
+      this.parent.removeChild(this.renderer.domElement)
+    }
+    this.renderer = null
   }
 
   // 渲染摄像头
@@ -39,7 +55,7 @@ class Sprite {
     this.dircLight = new THREE.DirectionalLight(0xffffff)
     this.dircLight.position.set(300, 400, 200)
     this.scene.add(this.dircLight)
-    var hemi = new THREE.HemisphereLight(0x003073, 0x029797, 0.75)
+    let hemi = new THREE.HemisphereLight(0x003073, 0x029797, 0.75)
     hemi.position.set(0.5, 1, 0.75)
     this.scene.add(hemi)
   }
@@ -58,8 +74,8 @@ class Sprite {
 
   //  added by tim
   initWave() {
-    var PI2 = Math.PI * 2
-    var mt = new THREE.PointCloudMaterial({
+    let PI2 = Math.PI * 2
+    let mt = new THREE.PointCloudMaterial({
       color: '#02d7e8',
       program: function (context) {
         context.beginPath()
@@ -67,7 +83,7 @@ class Sprite {
         context.fill()
       }
     })
-    var i = 0
+    let i = 0
 
     for (let ix = 0; ix < this.AMOUNTX; ix++) {
       for (let iy = 0; iy < this.AMOUNTY; iy++) {
@@ -81,17 +97,19 @@ class Sprite {
 
   render() {
     TWEEN.update()
-    var i = 0
-    for (let ix = 0; ix < this.AMOUNTX; ix++) {
-      for (let iy = 0; iy < this.AMOUNTY; iy++) {
-        this.particle = this.particles[i++]
-        this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 100
-        this.particle.scale.x = this.particle.scale.y = (Math.sin((ix + this.count) * 0.3) + 1) * 2 + (Math.sin((iy + this.count) * 0.5 + 1) * 2)
-
+    if (this.particle) {
+      let i = 0
+      for (let ix = 0; ix < this.AMOUNTX; ix++) {
+        for (let iy = 0; iy < this.AMOUNTY; iy++) {
+          this.particle = this.particles[i++]
+          this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 100
+          this.particle.scale.x = this.particle.scale.y = (Math.sin((ix + this.count) * 0.3) + 1) * 2 + (Math.sin((iy + this.count) * 0.5 + 1) * 2)
+          
+        }
       }
+      this.count += 0.1
+      this.renderer.render(this.scene, this.camera)
     }
-    this.count += 0.05
-    this.renderer.render(this.scene, this.camera)
   }
 
   // resize事件处理
@@ -105,7 +123,7 @@ class Sprite {
 
   animate() {
     this.render()
-    requestAnimationFrame(this.animate.bind(this))
+    return window.requestAnimationFrame(this.animate.bind(this))
   }
 }
 

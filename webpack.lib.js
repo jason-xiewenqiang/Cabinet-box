@@ -5,8 +5,8 @@ const path = require('path');
 module.exports = {
     mode: 'none',
     entry: {
-        'cabinet': './src/main.js',
-        'cabinet.min': './src/main.js'
+        'cabinet': './src/mySprite.js',
+        'cabinet.min': './src/mySprite.js'
     },
     output: {
         filename: '[name].js',

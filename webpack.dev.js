@@ -4,14 +4,14 @@ const webpack = require('webpack');
 const fs = require('fs');
 const path = require('path');
 const pathContext = ['/api', '/mock/35'];
-const proxyHost = '192.168.2.243:80';
+const proxyHost = '192.168.3.69:80';
 
 module.exports = merge(base, {
   mode: 'development',
   devServer: {
     hot: true,
     port: 8000,
-    host: '0.0.0.0',
+    host: 'localhost',
     open: true,
     compress: true,
     useLocalIp: false,

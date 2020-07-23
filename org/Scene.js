@@ -1,26 +1,27 @@
 import { loadTexture } from '../src/utils'
 class Scene {
   constructor(selector = null, dev = true, cabNumber = 5, callback = null) {
-    console.log('initial Scene.')
     this.container = selector ? document.querySelector(selector) : null // 是否有容器
     this.width = this.container ? this.container.offsetWidth : window.innerWidth
     this.height = this.container ? this.container.offsetHeight : window.innerHeight
     this.dev = dev // 是否开发模式
     this.scene = new THREE.Scene()
-    this.scene.position.set(0, -40, 0)
+    this.scene.position.set(0, -50, 0)
     this.camera = this.initCamera(cabNumber)
+    this.rotateY = new THREE.Matrix4().makeRotationY( 0.005 );
     this.initLight()
     this.initRenderer()
     this.initTexture()
     this.initFloor(cabNumber)
+    this.rotate = true  // 设置旋转
 
     // 粒子效果相关参数
-    this.particle = null
-    this.particles = []
-    this.AMOUNTX = 100
-    this.AMOUNTY = 60
-    this.SEPARATION = 80
-    this.count = 0
+    // this.particle = null
+    // this.particles = []
+    // this.AMOUNTX = 100
+    // this.AMOUNTY = 60
+    // this.SEPARATION = 80
+    // this.count = 0
     // this.initWave()
 
     // dev = true 开启
@@ -32,15 +33,22 @@ class Scene {
     }
     this.render()
     this.initControls()
-    this.animate()
+    this.animationID = this.animate()
     window.addEventListener('resize', this.onResize.bind(this), false)
     window.addEventListener('dblclick', this.injectHandler.bind(this, callback), false)
   }
 
+  setRotate(rat) {
+    this.rotate = rat
+  }
+
   // 摄像头
   initCamera(cabNumber) {
-    const camera = new THREE.PerspectiveCamera(55, this.width / this.height, 1, 10000)
-    camera.position.set(0, cabNumber > 5 ? 5 : 15, 200)
+    const camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 10000)
+    // camera.position.set(0, cabNumber > 5 ? 5 : 15, 200)
+    camera.position.set(0, 15, 200)
+    camera.lookAt( this.scene.position );
+    camera.updateMatrix();
     return camera
   }
 
@@ -56,7 +64,8 @@ class Scene {
 
   // 地板
   initFloor(cabNumber) {
-    const geometry = new THREE.BoxGeometry(cabNumber > 5 ? 600 : 300, 0, cabNumber > 5 ? 250 : 200)
+    // const geometry = new THREE.BoxGeometry(cabNumber > 5 ? 600 : 300, 0, cabNumber > 5 ? 250 : 200)
+    const geometry = new THREE.BoxGeometry(300, 0, 250)
     const material = new THREE.MeshLambertMaterial({
       color: 0xffffff,
       map: this.floorTexture,
@@ -78,19 +87,19 @@ class Scene {
   // 渲染器
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true
+      antialias: true,
+      alpha: true
     })
     this.renderer.setSize(this.width, this.height)
-    this.renderer.setClearColor('#0b0c0f')
+    // this.renderer.setClearColor('#0b0c0f')
+    this.renderer.setClearColor(0xEEEEEE, 0.0)
     this.container ? this.container.appendChild(this.renderer.domElement) : document.body.appendChild(this.renderer.domElement)
-  
     // 下面是 css的渲染
     this.labelRenderer = new THREE.CSS2DRenderer(); //新建CSS2DRenderer 
     this.labelRenderer.setSize(this.width, this.height);
     this.labelRenderer.domElement.style.position = 'absolute';
     this.labelRenderer.domElement.style.top = 0;
     this.container ? this.container.appendChild(this.labelRenderer.domElement) : document.body.appendChild(this.labelRenderer.domElement)
-
   }
 
   // 粒子效果
@@ -119,17 +128,24 @@ class Scene {
   // 渲染
   render() {
     TWEEN.update()
-    // let i = 0
-    // for (let ix = 0; ix < this.AMOUNTX; ix++) {
-    //   for (let iy = 0; iy < this.AMOUNTY; iy++) {
-    //     this.particle = this.particles[i++]
-    //     this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 400
-    //     this.particle.scale.x = this.particle.scale.y = (Math.sin((ix + this.count) * 0.3) + 1) * 2 + (Math.sin((iy + this.count) * 0.5 + 1) * 2)
-    //   }
-    // }
+    if (this.rotate) {
+      this.camera.applyMatrix4( this.rotateY );
+    }
     this.renderer.render(this.scene, this.camera)
     this.labelRenderer.render(this.scene, this.camera);
-    // this.count += 0.05
+    // if (this.particle) {
+      // let i = 0
+      // for (let ix = 0; ix < this.AMOUNTX; ix++) {
+      //   for (let iy = 0; iy < this.AMOUNTY; iy++) {
+      //     this.particle = this.particles[i++]
+      //     this.particle.position.y = (Math.sin((ix + this.count) * 0.3) * 50) + (Math.sin((iy + this.count) * 0.5) * 50) - 400
+      //     this.particle.scale.x = this.particle.scale.y = (Math.sin((ix + this.count) * 0.3) + 1) * 2 + (Math.sin((iy + this.count) * 0.5 + 1) * 2)
+      //   }
+      // }
+      // this.renderer.render(this.scene, this.camera)
+      // this.labelRenderer.render(this.scene, this.camera);
+      // this.count += 0.05
+    // }
   }
 
   // 控制器
@@ -168,7 +184,7 @@ class Scene {
   animate() {
     this.render()
     if (this.dev) { this.stats.update() }
-    requestAnimationFrame(this.animate.bind(this))
+    return requestAnimationFrame(this.animate.bind(this))
   }
 
   // 注册器
@@ -213,6 +229,30 @@ class Scene {
    }
 
     this.render()
+  }
+
+  destroyed() {
+    window.cancelAnimationFrame(this.animationID)
+    this.animationID = null
+    this.scene = null
+    this.camera = null
+    this.particle = null
+    this.particles = []
+    this.dircLight = null
+    this.dev = null
+    this.controls = null
+    window.removeEventListener('resize', ()=>{})
+    window.removeEventListener('dblclick', ()=>{})
+    if (this.container) {
+      this.container.removeChild(this.renderer.domElement)
+      this.container.removeChild(this.labelRenderer.domElement)
+    } else {
+      document.body.removeChild(this.renderer.domElement)
+      document.body.removeChild(this.labelRenderer.domElement)
+    }
+    this.container = null
+    this.renderer = null
+    this.labelRenderer = null
   }
 }
 
